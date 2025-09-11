@@ -35,6 +35,33 @@ async fn test_btc_xpub() {
 }
 
 #[tokio::test]
+async fn test_btc_xpubs() {
+    test_initialized_simulators(async |paired_bitbox| {
+        let result = paired_bitbox
+            .btc_xpubs(
+                pb::BtcCoin::Tbtc,
+                &[
+                    "m/49'/1'/0'".try_into().unwrap(),
+                    "m/84'/1'/0'".try_into().unwrap(),
+                    "m/86'/1'/0'".try_into().unwrap(),
+                ],
+                pb::btc_xpubs_request::XPubType::Tpub,
+            )
+            .await;
+
+        assert_eq!(
+            result.unwrap(),
+            vec![
+                "tpubDCNtvuCS9oj3psPNfXZXuGjcQ5rSBi3MzigjBqqwQohWWetoRdLzT5v2uJq6KBTwxj1FYvuPTr7RoWkN4cmubDy5wW8SU3q9xYnDRpQepiT",
+				"tpubDCYNsKenq7Cuuf4fHsu2fsWA7Wb5cTD2qRUrw6uHbNNYQoNkEoJk4hgNhxbnGss5gnEe2MpqN2qbRVqWJGmuofAWmwFFi4CZ9Tg1LHKJDhF",
+				"tpubDDc6eecoyYxL4g3WKYpbbinyUmnfVikQCzHTPd6rJQivaPqGKBFiueQqWoAYonB8hAEXGM1ak7LqrnwczH24EbW7jbG5bNK5rncmRXtv7nG",
+            ],
+        );
+    })
+    .await
+}
+
+#[tokio::test]
 async fn test_btc_address() {
     test_initialized_simulators(async |paired_bitbox| {
         let address = paired_bitbox
