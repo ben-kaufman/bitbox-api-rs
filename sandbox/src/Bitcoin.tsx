@@ -76,6 +76,73 @@ function BtcXPub({ bb02 } : Props) {
   );
 }
 
+
+function BtcXPubs({ bb02 } : Props) {
+  const [coin, setCoin] = useState<bitbox.BtcCoin>('btc');
+  const [keypaths, setKeypaths] = useState(`["m/49'/0'/0'", "m/84'/0'/0'", "m/86'/0'/0'"]`);
+  const [xpubType, setXpubType] = useState<bitbox.BtcXPubsType>('xpub');
+  const [result, setResult] = useState<bitbox.BtcXpubs | undefined>();
+  const [running, setRunning] = useState(false);
+  const [err, setErr] = useState<bitbox.Error>();
+
+  const btcXPubsTypeOptions = ['tpub', 'xpub'];
+
+  const submitForm = async (e: FormEvent) => {
+    e.preventDefault();
+    setRunning(true);
+    setResult(undefined);
+    setErr(undefined);
+    try {
+      setResult(await bb02.btcXpubs(coin, JSON.parse(keypaths), xpubType));
+    } catch (err) {
+      throw err;
+      setErr(bitbox.ensureError(err));
+    } finally {
+      setRunning(false);
+    }
+  }
+
+
+  return (
+    <div>
+      <h4>Multiple XPubs</h4>
+      <form className="verticalForm"onSubmit={submitForm}>
+        <label>
+          Coin
+          <select value={coin} onChange={e => setCoin(e.target.value as bitbox.BtcCoin)}>
+            {btcCoinOptions.map(option => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </label>
+        <label>
+          Keypaths
+        </label>
+        <textarea value={keypaths} onChange={e => setKeypaths(e.target.value)} rows={5} cols={80} />
+        <label>
+          XPub Type
+          <select value={xpubType} onChange={e => setXpubType(e.target.value as bitbox.BtcXPubsType)}>
+            {btcXPubsTypeOptions.map(option => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </label>
+
+        <button type='submit' disabled={running}>Get XPubs</button>
+          {result ? <>
+            <div className="resultContainer">
+              <label>Result</label>
+              {
+                result.map((xpub, i) => (
+                  <code key={i}>
+                    {i}: <b>{xpub}</b><br />
+                  </code>
+                ))
+              }
+            </div>
+          </> : null}
+        <ShowError err={err} />
+      </form>
+    </div>
+  );
+}
+
 function BtcAddressSimple({ bb02 }: Props) {
   const [coin, setCoin] = useState<bitbox.BtcCoin>('btc');
   const [simpleType, setSimpleType] = useState<bitbox.BtcSimpleType>('p2wpkhP2sh');
@@ -450,6 +517,9 @@ export function Bitcoin({ bb02 } : Props) {
     <>
       <div className="action">
         <BtcXPub bb02={bb02} />
+      </div>
+      <div className="action">
+        <BtcXPubs bb02={bb02} />
       </div>
       <div className="action">
         <BtcAddressSimple bb02={bb02} />
