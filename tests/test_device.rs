@@ -14,8 +14,20 @@ async fn test_device_info() {
     test_simulators_after_pairing(async |paired_bitbox| {
         let device_info = paired_bitbox.device_info().await.unwrap();
 
-        assert_eq!(device_info.name, "My BitBox");
-        assert_eq!(paired_bitbox.product(), bitbox_api::Product::BitBox02Multi);
+        // Since v9.24.0, the simulator simulates a Nova device.
+        if semver::VersionReq::parse(">=9.24.0")
+            .unwrap()
+            .matches(paired_bitbox.version())
+        {
+            assert_eq!(
+                paired_bitbox.product(),
+                bitbox_api::Product::BitBox02NovaMulti
+            );
+            assert_eq!(device_info.name, "BitBox HCXT")
+        } else {
+            assert_eq!(paired_bitbox.product(), bitbox_api::Product::BitBox02Multi);
+            assert_eq!(device_info.name, "My BitBox")
+        }
     })
     .await
 }

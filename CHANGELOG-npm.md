@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.11.0
+- Add `btcXpubs()`
+
 ## 0.10.1
 - package.json: use "main" instead of "module" to fix compatiblity with vitest
 

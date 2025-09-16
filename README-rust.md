@@ -27,7 +27,7 @@ Use `--nocapture` to also see some useful simulator output.
 If you want to test against a custom simulator build (e.g. when developing new firmware features),
 you can run:
 
-    SIMULATOR=/path/to/simulator cargo test --features=simulator,tokio
+    SIMULATOR=/path/to/simulator cargo test --features=simulator,tokio -- --test-threads 1
 
 In this case, only the given simulator will be used, and the ones defined in simulators.json will be
 ignored.

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.10.0
+- Add `btc_xpubs()`
+
 ## 0.9.0
 - Add support for BitBox02 Nova
 

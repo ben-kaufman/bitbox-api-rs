@@ -8,6 +8,13 @@ pub struct PubResponse {
 }
 #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PubsResponse {
+    #[prost(string, repeated, tag = "1")]
+    pub pubs: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct RootFingerprintRequest {}
 #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
@@ -153,6 +160,26 @@ pub struct DeviceInfoResponse {
     /// From v9.6.0: "ATECC608A" or "ATECC608B".
     #[prost(string, tag = "6")]
     pub securechip_model: ::prost::alloc::string::String,
+    /// Only present in Bluetooth-enabled devices.
+    #[prost(message, optional, tag = "7")]
+    pub bluetooth: ::core::option::Option<device_info_response::Bluetooth>,
+}
+/// Nested message and enum types in `DeviceInfoResponse`.
+pub mod device_info_response {
+    #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+    #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+    #[derive(Clone, PartialEq, ::prost::Message)]
+    pub struct Bluetooth {
+        /// Hash of the currently active Bluetooth firmware on the device.
+        #[prost(bytes = "vec", tag = "1")]
+        pub firmware_hash: ::prost::alloc::vec::Vec<u8>,
+        /// Firmware version, formated as an unsigned integer "1", "2", etc.
+        #[prost(string, tag = "2")]
+        pub firmware_version: ::prost::alloc::string::String,
+        /// True if Bluetooth is enabled
+        #[prost(bool, tag = "3")]
+        pub enabled: bool,
+    }
 }
 #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
@@ -226,6 +253,77 @@ pub struct SetDeviceNameRequest {
 pub struct SetPasswordRequest {
     #[prost(bytes = "vec", tag = "1")]
     pub entropy: ::prost::alloc::vec::Vec<u8>,
+}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct BluetoothToggleEnabledRequest {}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct BluetoothUpgradeInitRequest {
+    #[prost(uint32, tag = "1")]
+    pub firmware_length: u32,
+}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BluetoothChunkRequest {
+    #[prost(bytes = "vec", tag = "1")]
+    pub data: ::prost::alloc::vec::Vec<u8>,
+}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct BluetoothSuccess {}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct BluetoothRequestChunkResponse {
+    #[prost(uint32, tag = "1")]
+    pub offset: u32,
+    #[prost(uint32, tag = "2")]
+    pub length: u32,
+}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BluetoothRequest {
+    #[prost(oneof = "bluetooth_request::Request", tags = "1, 2, 3")]
+    pub request: ::core::option::Option<bluetooth_request::Request>,
+}
+/// Nested message and enum types in `BluetoothRequest`.
+pub mod bluetooth_request {
+    #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+    #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Request {
+        #[prost(message, tag = "1")]
+        UpgradeInit(super::BluetoothUpgradeInitRequest),
+        #[prost(message, tag = "2")]
+        Chunk(super::BluetoothChunkRequest),
+        #[prost(message, tag = "3")]
+        ToggleEnabled(super::BluetoothToggleEnabledRequest),
+    }
+}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct BluetoothResponse {
+    #[prost(oneof = "bluetooth_response::Response", tags = "1, 2")]
+    pub response: ::core::option::Option<bluetooth_response::Response>,
+}
+/// Nested message and enum types in `BluetoothResponse`.
+pub mod bluetooth_response {
+    #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+    #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+    #[derive(Clone, Copy, PartialEq, ::prost::Oneof)]
+    pub enum Response {
+        #[prost(message, tag = "1")]
+        Success(super::BluetoothSuccess),
+        #[prost(message, tag = "2")]
+        RequestChunk(super::BluetoothRequestChunkResponse),
+    }
 }
 #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
@@ -490,6 +588,61 @@ pub mod btc_pub_request {
         XpubType(i32),
         #[prost(message, tag = "4")]
         ScriptConfig(super::BtcScriptConfig),
+    }
+}
+#[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BtcXpubsRequest {
+    #[prost(enumeration = "BtcCoin", tag = "1")]
+    pub coin: i32,
+    #[prost(enumeration = "btc_xpubs_request::XPubType", tag = "2")]
+    pub xpub_type: i32,
+    #[prost(message, repeated, tag = "3")]
+    pub keypaths: ::prost::alloc::vec::Vec<Keypath>,
+}
+/// Nested message and enum types in `BTCXpubsRequest`.
+pub mod btc_xpubs_request {
+    #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
+    #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
+    #[derive(
+        Clone,
+        Copy,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+        PartialOrd,
+        Ord,
+        ::prost::Enumeration
+    )]
+    #[repr(i32)]
+    pub enum XPubType {
+        Unknown = 0,
+        Xpub = 1,
+        Tpub = 2,
+    }
+    impl XPubType {
+        /// String value of the enum field names used in the ProtoBuf definition.
+        ///
+        /// The values are not transformed in any way and thus are considered stable
+        /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+        pub fn as_str_name(&self) -> &'static str {
+            match self {
+                Self::Unknown => "UNKNOWN",
+                Self::Xpub => "XPUB",
+                Self::Tpub => "TPUB",
+            }
+        }
+        /// Creates an enum from field names used in the ProtoBuf definition.
+        pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+            match value {
+                "UNKNOWN" => Some(Self::Unknown),
+                "XPUB" => Some(Self::Xpub),
+                "TPUB" => Some(Self::Tpub),
+                _ => None,
+            }
+        }
     }
 }
 #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
@@ -932,7 +1085,7 @@ pub struct BtcSignMessageResponse {
 #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct BtcRequest {
-    #[prost(oneof = "btc_request::Request", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
+    #[prost(oneof = "btc_request::Request", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
     pub request: ::core::option::Option<btc_request::Request>,
 }
 /// Nested message and enum types in `BTCRequest`.
@@ -957,13 +1110,15 @@ pub mod btc_request {
         AntikleptoSignature(super::AntiKleptoSignatureRequest),
         #[prost(message, tag = "8")]
         PaymentRequest(super::BtcPaymentRequestRequest),
+        #[prost(message, tag = "9")]
+        Xpubs(super::BtcXpubsRequest),
     }
 }
 #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", serde(rename_all = "camelCase"))]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct BtcResponse {
-    #[prost(oneof = "btc_response::Response", tags = "1, 2, 3, 4, 5")]
+    #[prost(oneof = "btc_response::Response", tags = "1, 2, 3, 4, 5, 6")]
     pub response: ::core::option::Option<btc_response::Response>,
 }
 /// Nested message and enum types in `BTCResponse`.
@@ -982,6 +1137,8 @@ pub mod btc_response {
         SignMessage(super::BtcSignMessageResponse),
         #[prost(message, tag = "5")]
         AntikleptoSignerCommitment(super::AntiKleptoSignerCommitment),
+        #[prost(message, tag = "6")]
+        Pubs(super::PubsResponse),
     }
 }
 #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
@@ -2076,7 +2233,7 @@ pub struct Success {}
 pub struct Request {
     #[prost(
         oneof = "request::Request",
-        tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28"
+        tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29"
     )]
     pub request: ::core::option::Option<request::Request>,
 }
@@ -2140,6 +2297,8 @@ pub mod request {
         Cardano(super::CardanoRequest),
         #[prost(message, tag = "28")]
         Bip85(super::Bip85Request),
+        #[prost(message, tag = "29")]
+        Bluetooth(super::BluetoothRequest),
     }
 }
 #[cfg_attr(feature = "wasm", derive(serde::Serialize, serde::Deserialize))]
@@ -2148,7 +2307,7 @@ pub mod request {
 pub struct Response {
     #[prost(
         oneof = "response::Response",
-        tags = "1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16"
+        tags = "1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17"
     )]
     pub response: ::core::option::Option<response::Response>,
 }
@@ -2189,5 +2348,7 @@ pub mod response {
         Cardano(super::CardanoResponse),
         #[prost(message, tag = "16")]
         Bip85(super::Bip85Response),
+        #[prost(message, tag = "17")]
+        Bluetooth(super::BluetoothResponse),
     }
 }

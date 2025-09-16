@@ -257,6 +257,29 @@ impl PairedBitBox {
             .await?)
     }
 
+    /// Query the device for xpubs. The result contains one xpub per requested keypath.
+    #[wasm_bindgen(js_name = btcXpubs)]
+    pub async fn btc_xpubs(
+        &self,
+        coin: types::TsBtcCoin,
+        keypaths: Vec<types::TsKeypath>,
+        xpub_type: types::TsBtcXPubsType,
+    ) -> Result<types::TsBtcXpubs, JavascriptError> {
+        let xpubs = self
+            .device
+            .btc_xpubs(
+                coin.try_into()?,
+                keypaths
+                    .into_iter()
+                    .map(|kp| kp.try_into())
+                    .collect::<Result<Vec<crate::Keypath>, _>>()?
+                    .as_slice(),
+                xpub_type.try_into()?,
+            )
+            .await?;
+        Ok(serde_wasm_bindgen::to_value(&xpubs).unwrap().into())
+    }
+
     /// Before a multisig or policy script config can be used to display receive addresses or sign
     /// transactions, it must be registered on the device. This function checks if the script config
     /// was already registered.

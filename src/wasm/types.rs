@@ -15,6 +15,7 @@ type Product = 'unknown' | 'bitbox02-multi' | 'bitbox02-btconly' | 'bitbox02-nov
 type BtcCoin = 'btc' | 'tbtc' | 'ltc' | 'tltc' | 'rbtc';
 type BtcFormatUnit = 'default' | 'sat';
 type XPubType = 'tpub' | 'xpub' | 'ypub' | 'zpub' | 'vpub' | 'upub' | 'Vpub' | 'Zpub' | 'Upub' | 'Ypub';
+type BtcXPubsType = 'tpub' | 'xpub';
 type Keypath = string | number[];
 type XPub = string;
 type DeviceInfo = {
@@ -50,6 +51,7 @@ type BtcSignMessageSignature = {
   recid: bigint,
   electrumSig65: Uint8Array,
 };
+type BtcXpubs = string[];
 // nonce, gasPrice, gasLimit and value must be big-endian encoded, no trailing zeroes.
 type EthTransaction = {
   nonce: Uint8Array;
@@ -172,6 +174,8 @@ extern "C" {
     pub type TsBtcFormatUnit;
     #[wasm_bindgen(typescript_type = "XPubType")]
     pub type TsXPubType;
+    #[wasm_bindgen(typescript_type = "BtcXPubsType")]
+    pub type TsBtcXPubsType;
     #[wasm_bindgen(typescript_type = "Keypath")]
     pub type TsKeypath;
     #[wasm_bindgen(typescript_type = "DeviceInfo")]
@@ -190,6 +194,8 @@ extern "C" {
     pub type TsBtcScriptConfigWithKeypath;
     #[wasm_bindgen(typescript_type = "BtcSignMessageSignature")]
     pub type TsBtcSignMessageSignature;
+    #[wasm_bindgen(typescript_type = "BtcXpubs")]
+    pub type TsBtcXpubs;
     #[wasm_bindgen(typescript_type = "EthTransaction")]
     pub type TsEthTransaction;
     #[wasm_bindgen(typescript_type = "Eth1559Transaction")]
@@ -235,6 +241,14 @@ impl TryFrom<TsXPubType> for crate::pb::btc_pub_request::XPubType {
     fn try_from(value: TsXPubType) -> Result<Self, Self::Error> {
         serde_wasm_bindgen::from_value(value.into())
             .map_err(|_| JavascriptError::InvalidType("wrong type for XPubType"))
+    }
+}
+
+impl TryFrom<TsBtcXPubsType> for crate::pb::btc_xpubs_request::XPubType {
+    type Error = JavascriptError;
+    fn try_from(value: TsBtcXPubsType) -> Result<Self, Self::Error> {
+        serde_wasm_bindgen::from_value(value.into())
+            .map_err(|_| JavascriptError::InvalidType("wrong type for BTCXPubsType"))
     }
 }
 

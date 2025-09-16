@@ -643,6 +643,43 @@ impl<R: Runtime> PairedBitBox<R> {
         }
     }
 
+    /// Retrieves multiple xpubs at once. Only standard keypaths are allowed.
+    /// On firmware <v9.24.0, this falls back to calling `btc_xpub()` for each keypath.
+    pub async fn btc_xpubs(
+        &self,
+        coin: pb::BtcCoin,
+        keypaths: &[Keypath],
+        xpub_type: pb::btc_xpubs_request::XPubType,
+    ) -> Result<Vec<String>, Error> {
+        if self.validate_version(">=9.24.0").is_err() {
+            // Fallback to fetching them one-by-one on older firmware.
+            let mut xpubs = Vec::<String>::with_capacity(keypaths.len());
+            for keypath in keypaths {
+                let converted_xpub_type = match xpub_type {
+                    pb::btc_xpubs_request::XPubType::Unknown => return Err(Error::Unknown),
+                    pb::btc_xpubs_request::XPubType::Tpub => pb::btc_pub_request::XPubType::Tpub,
+                    pb::btc_xpubs_request::XPubType::Xpub => pb::btc_pub_request::XPubType::Xpub,
+                };
+                let xpub = self
+                    .btc_xpub(coin, keypath, converted_xpub_type, false)
+                    .await?;
+                xpubs.push(xpub);
+            }
+            return Ok(xpubs);
+        }
+        match self
+            .query_proto_btc(pb::btc_request::Request::Xpubs(pb::BtcXpubsRequest {
+                coin: coin as _,
+                xpub_type: xpub_type as _,
+                keypaths: keypaths.iter().map(|kp| kp.into()).collect(),
+            }))
+            .await?
+        {
+            pb::btc_response::Response::Pubs(pb::PubsResponse { pubs }) => Ok(pubs),
+            _ => Err(Error::UnexpectedResponse),
+        }
+    }
+
     /// Retrieves a Bitcoin address at the provided keypath.
     ///
     /// For the simple script configs (single-sig), the keypath must follow the
