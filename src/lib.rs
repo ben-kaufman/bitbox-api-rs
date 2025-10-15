@@ -17,7 +17,7 @@ pub mod usb;
 pub mod wasm;
 
 mod antiklepto;
-mod communication;
+pub mod communication;
 mod constants;
 mod keypath;
 mod u2fframing;
@@ -73,7 +73,7 @@ pub struct BitBox<R: Runtime> {
 pub type PairingCode = String;
 
 impl<R: Runtime> BitBox<R> {
-    async fn from(
+    pub async fn from(
         device: Box<dyn communication::ReadWrite>,
         noise_config: Box<dyn NoiseConfig>,
     ) -> Result<BitBox<R>, Error> {
